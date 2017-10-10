@@ -34,6 +34,7 @@ from botocore.utils import S3_ACCELERATE_WHITELIST
 from botocore.args import ClientArgsCreator
 from botocore.compat import urlsplit
 from botocore import UNSIGNED
+from botocore.cloudcoreo_instrument import cloudcoreo_inspect
 # Keep this imported.  There's pre-existing code that uses
 # "from botocore.client import Config".
 from botocore.config import Config
@@ -586,6 +587,8 @@ class BaseClient(object):
         else:
             http, parsed_response = self._endpoint.make_request(
                 operation_model, request_dict)
+
+        cloudcoreo_inspect(request_dict, parsed_response, http)
 
         self.meta.events.emit(
             'after-call.{endpoint_prefix}.{operation_name}'.format(
