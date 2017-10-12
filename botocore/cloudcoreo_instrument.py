@@ -4,36 +4,41 @@ import json
 import logging
 from os import environ
 import pdb
+import requests
 
 from botocore.endpoint import Endpoint
 
 CC_DEFAULT_ENDPOINT = 'http://localhost:4444'
+CC_ENDPOINT = environ.get('CC_ENDPOINT', CC_DEFAULT_ENDPOINT)
 
 def cloudcoreo_inspect(parsed_request, raw_request,
-                       parsed_response, raw_response):
-    cc_token_key_id = environ.get('CC_TOKEN_KEY_ID')
-    cc_token_secret_key = environ.get('CC_TOKEN_SECRET_KEY')
-    cc_team_id = environ.get('CC_TEAM_ID')
-    cc_endpoint = environ.get('CC_ENDPOINT', CC_DEFAULT_ENDPOINT)
+                       parsed_response, raw_response, host):
 
     data = _parse(parsed_request,
                   raw_request,
                   parsed_response,
-                  raw_response)
-    print(data)
+                  raw_response,
+                  host)
 
-def _parse(req, raw_req, res, raw_res):
+    return requests.post(CC_ENDPOINT, data = data)
+
+def _parse(req, raw_req, res, raw_res, host):
     res_meta = res['ResponseMetadata']
+
+    req_headers = {k: v for k, v in raw_req.headers.items()}
+    if host.find("://"):
+        host = host.split("://")[1]
+    req_headers['Host'] = host
 
     data = {
         'url': req['url'],
         'http_verb': req['method'],
-        'devtime_id': 'devtime-id-goes-here',
-        'request_headers': {k: v for k, v in raw_req.headers.items()},
+        'devtime_id': '5754ffb4-983c-4033-b593-2b06145a413e',
+        'request_headers': json.dumps(req_headers),
         'request_body': req['body'],
         'response_status': res_meta['HTTPStatusCode'],
-        'response_headers': res_meta['HTTPHeaders'],
+        'response_headers': json.dumps(res_meta['HTTPHeaders']),
         'response_body': raw_res.text
     }
 
-    return json.dumps(data)
+    return data

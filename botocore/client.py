@@ -589,7 +589,7 @@ class BaseClient(object):
                 operation_model, request_dict)
 
         full_request = self._endpoint.create_request(request_dict, operation_model)
-        cloudcoreo_inspect(request_dict, full_request, parsed_response, http)
+        cloudcoreo_inspect(request_dict, full_request, parsed_response, http, self._endpoint.host)
 
         self.meta.events.emit(
             'after-call.{endpoint_prefix}.{operation_name}'.format(
