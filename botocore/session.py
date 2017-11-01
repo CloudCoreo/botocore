@@ -496,6 +496,9 @@ class Session(object):
         If ``user_agent_extra`` is not empty, then this value will be
         appended to the end of the user agent string.
 
+        If the $HTTP_USER_AGENT_SUFFIX env variable is set, then this
+        value will be appended to the end of the user agent string.
+
         """
         base = '%s/%s Python/%s %s/%s' % (self.user_agent_name,
                                           self.user_agent_version,
@@ -506,6 +509,8 @@ class Session(object):
             base += ' exec-env/%s' % os.environ.get('AWS_EXECUTION_ENV')
         if self.user_agent_extra:
             base += ' %s' % self.user_agent_extra
+        if os.environ.get('HTTP_USER_AGENT_SUFFIX') is not None:
+            base += ' %s' % os.environ.get('HTTP_USER_AGENT_SUFFIX')
 
         return base
 
